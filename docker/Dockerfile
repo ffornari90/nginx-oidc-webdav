@@ -160,10 +160,13 @@ LABEL org.label-schema.vendor="Red Hat" \
 
 WORKDIR ${PREFIX_DIR}/nginx
 
-RUN mkdir -p /data/www
+RUN mkdir -p /data/www /conf \
+    && touch /conf/nginx.conf
 
 EXPOSE 8085
 
 STOPSIGNAL SIGTERM
 
-CMD /opt/ibm/router/nginx/sbin/nginx -p ./ -c conf/nginx.conf -g 'daemon off;'
+CMD cp /conf/nginx.conf conf/nginx.conf && \
+    sed -i 's/\${IAM_HOST}/'$IAM_HOST'/g' conf/nginx.conf && \
+    /opt/ibm/router/nginx/sbin/nginx -p ./ -c conf/nginx.conf -g 'daemon off;'

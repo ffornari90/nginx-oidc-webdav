@@ -9,9 +9,9 @@ services:
     extra_hosts:
       - "${IAM_HOST}:${IAM_IP}"
     environment:
-      TZ: UTC
+      IAM_HOST: ${IAM_HOST}
     volumes:
-      - ./conf/frontend.conf:/opt/ibm/router/nginx/conf/nginx.conf
+      - ./conf/frontend.conf:/conf/nginx.conf
     ports:
       - "8085:8085"
     depends_on:
@@ -46,7 +46,7 @@ services:
   backend:
     image: ffornari/nginx-oidc-webdav
     volumes:
-      - ./conf/backend.conf:/opt/ibm/router/nginx/conf/nginx.conf
+      - ./conf/backend.conf:/conf/nginx.conf
       - ./srv/data:/data/www
     networks:
       network:
