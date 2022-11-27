@@ -90,7 +90,8 @@ enabled=1' | tee /etc/yum.repos.d/centos-appstream.repo \
        openssl-devel \
        patch \
        ca-policy-egi-core \
-    && for f in `find /etc/grid-security/certificates -type f -name '*.pem'`; do cp $f /etc/pki/ca-trust/source/anchors/; done \
+    && for f in `find /etc/grid-security/certificates -type f -name '*.pem'`; \
+       do cp $f /etc/pki/ca-trust/source/anchors/; done \
     && update-ca-trust \
     && cd /tmp \
     && tar xzf openresty-${RESTY_VERSION}.tar.gz
@@ -159,7 +160,7 @@ LABEL org.label-schema.vendor="Red Hat" \
 
 WORKDIR ${PREFIX_DIR}/nginx
 
-RUN mkdir -p /data/www /data/nginx/cache
+RUN mkdir -p /data/www
 
 EXPOSE 8085
 

@@ -1,1 +1,1 @@
-docker build -t nginx-oidc-webdav .
+docker build -t ffornari/nginx-oidc-webdav .

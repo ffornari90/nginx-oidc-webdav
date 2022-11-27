@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   frontend:
-    image: nginx-oidc-webdav
+    image: ffornari/nginx-oidc-webdav
     links:
       - "dns:dns"
       - "backend:backend"
@@ -44,7 +44,7 @@ services:
         ipv4_address: ${DNS_IP}
 
   backend:
-    image: nginx-oidc-webdav
+    image: ffornari/nginx-oidc-webdav
     volumes:
       - ./conf/backend.conf:/opt/ibm/router/nginx/conf/nginx.conf
       - ./srv/data:/data/www
