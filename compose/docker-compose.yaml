@@ -1,6 +1,25 @@
 version: "3.5"
 
 services:
+  frontend:
+    image: nginx-oidc-webdav
+    links:
+      - "dns:dns"
+      - "backend:backend"
+    extra_hosts:
+      - "${IAM_HOST}:${IAM_IP}"
+    environment:
+      TZ: UTC
+    volumes:
+      - ./conf/frontend.conf:/opt/ibm/router/nginx/conf/nginx.conf
+    ports:
+      - "8085:8085"
+    depends_on:
+      - dns
+    networks:
+      network:
+        ipv4_address: ${FRONTEND_IP}
+
   dns:
     restart: always
     image: strm/dnsmasq
@@ -9,28 +28,33 @@ services:
       "--no-resolv",
       "--server=8.8.4.4",
       "--server=8.8.8.8",
-      "--address=/$IAM_HOST/$IAM_IP"
+      "--address=/$IAM_HOST/$IAM_IP",
+      "--address=/backend/$BACKEND_IP"
     ]
     environment:
       IAM_IP: ${IAM_IP}
       IAM_HOST: ${IAM_HOST}
+      BACKEND_IP: ${BACKEND_IP}
     cap_add:
       - NET_ADMIN
-
-  frontend:
-    image: nginx-oidc-webdav
-    links:
-      - "dns:dns"
-      - "backend:backend"
-    environment:
-      TZ: UTC
-    volumes:
-      - ./conf/frontend.conf:/opt/ibm/router/nginx/conf/nginx.conf
-    ports:
-      - "8085:8085"
+    depends_on:
+      - backend
+    networks:
+      network:
+        ipv4_address: ${DNS_IP}
 
   backend:
     image: nginx-oidc-webdav
     volumes:
       - ./conf/backend.conf:/opt/ibm/router/nginx/conf/nginx.conf
       - ./srv/data:/data/www
+    networks:
+      network:
+        ipv4_address: ${BACKEND_IP}
+
+networks:
+  network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${SUBNET_CIDR}
