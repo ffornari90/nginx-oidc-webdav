@@ -1,0 +1,36 @@
+version: "3.5"
+
+services:
+  dns:
+    restart: always
+    image: strm/dnsmasq
+    command: [
+      "--log-queries",
+      "--no-resolv",
+      "--server=8.8.4.4",
+      "--server=8.8.8.8",
+      "--address=/$IAM_HOST/$IAM_IP"
+    ]
+    environment:
+      IAM_IP: ${IAM_IP}
+      IAM_HOST: ${IAM_HOST}
+    cap_add:
+      - NET_ADMIN
+
+  frontend:
+    image: nginx-oidc-webdav
+    links:
+      - "dns:dns"
+      - "backend:backend"
+    environment:
+      TZ: UTC
+    volumes:
+      - ./conf/frontend.conf:/opt/ibm/router/nginx/conf/nginx.conf
+    ports:
+      - "8085:8085"
+
+  backend:
+    image: nginx-oidc-webdav
+    volumes:
+      - ./conf/backend.conf:/opt/ibm/router/nginx/conf/nginx.conf
+      - ./srv/data:/data/www
