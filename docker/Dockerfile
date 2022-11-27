@@ -8,6 +8,7 @@ ARG RESTY_VERSION="1.19.3.2"
 ARG ROLLBACK_RESTY_VERSION="1.17.8.2"
 ARG RESTY_J="1"
 ARG RESTY_CONFIG_OPTIONS="\
+    --add-module=./nginx-dav-ext-module \
     --with-http_geoip_module=dynamic \
     --with-md5-asm \
     --with-sha1-asm \
@@ -63,6 +64,9 @@ gpgcheck=0 \n\
 enabled=1' | tee /etc/yum.repos.d/centos-appstream.repo \
     && microdnf install -y perl \
        libxslt-devel \
+       libxslt \
+       libxml2-devel \
+       libxml2 \
        make \
        perl-devel \
        boost-devel \
@@ -74,7 +78,6 @@ enabled=1' | tee /etc/yum.repos.d/centos-appstream.repo \
        GeoIP-devel \
        libgcc \
        wget \
-       libxslt \
        zlib \
        gcc \
        gcc-c++ \
@@ -105,6 +108,7 @@ RUN if [[ "$(uname -m)" != "s390x" ]]; then \
         && sed -ire "s/for .int /int i; for (/g" `find ./ -name lib_jit.c` \
         # patch to fix this issue https://github.com/openresty/luajit2/issues/122 in ppc64le
         && patch -l /tmp/openresty-${RESTY_VERSION}/bundle/LuaJIT-2.1-20201027/src/lj_def.h /tmp/lj_def.h.patch \
+        && git clone https://github.com/arut/nginx-dav-ext-module.git \
         && ./configure -j${RESTY_J} ${RESTY_CONFIG_OPTIONS} ${RESTY_CONFIG_OPTIONS_MORE} \
         && make -j${RESTY_J} \
         && make -j${RESTY_J} install \
